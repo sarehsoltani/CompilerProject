@@ -2,7 +2,7 @@
 Compiler course final project
 
 # Parts
-   Lexical Analyzer
-   Syntax Analyzer
-   Semantic Analyzer
-   Code Generator
+    Lexical Analyzer
+    Syntax Analyzer
+    Semantic Analyzer
+    Code Generator
