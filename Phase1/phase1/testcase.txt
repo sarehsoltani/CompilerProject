@@ -1,4 +1,4 @@
-program Testcase_Phase1 
+program compilerPhaseOne 
 		var 
 			sare ,negar : real;
 			num : integer;
