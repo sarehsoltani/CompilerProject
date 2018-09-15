@@ -1,0 +1,35 @@
+program x
+		var 
+			sare ,negar : real;
+			num : integer;
+		procedure calc(x,y,z,a,b,c : integer; k : real);
+			var m : integer;
+			begin
+				x := #0.1 + #12;
+				y := #12 * #2;
+				z := #51.0 % #39;
+				a := #1;
+				b := #1;
+				if(x .lt y) then
+					m := x
+				else
+					m := y/#2;
+				if(z .gt m) then
+					m := z;
+	
+				repeat 
+					m := m - #1
+					exit if (m .le #1)
+					m := m + #1
+				end;
+				
+				c := a and b;
+				if ( c .eq #0) then
+					if(b .eq #1) then
+						c:= a or b
+				else 
+				       c:= a and b
+			
+			end;
+			begin
+			end
