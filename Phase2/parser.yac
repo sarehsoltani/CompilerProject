@@ -44,6 +44,17 @@ import java.io.*;
     }
 }
 
+%nonassoc IFX 
+%right "THEN_KW" "ELSE_KW"
+
+%left OR_KW
+%left AND_KW 
+%left EQ_KW NE_KW
+%left LT_KW GT_KW LE_KW GE_KW
+%left ADD_KW SUB_KW
+%left MUL_KW DIV_KW MOD_KW
+%right NOT_KW
+%left ELSE_KW
 
 
 %%
