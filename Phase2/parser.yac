@@ -3,4 +3,270 @@ import java.io.*;
 %}
 
 %token PROGRAM_KW IDENTIFIER VAR_KW INTEGER_KW REAL_KW PROCEDURE_KW END_KW IF_KW THEN_KW ELSE_KW REPEAT_KW EXIT_KW FOR_KW INTEGER_CONSTANT TO_KW DO_KW BEGIN_KW DOWNTO_KW REAL_CONSTANT DIV_KW MOD_KW AND_KW OR_KW NOT_KW EMPTY_KW BOOLEAN_KW SEMICOLON_KW COLON_KW COMMA_KW SINGLE_QUOTE_KW ASS_KW LP_KW RP_KW LB_KW RB_KW LCB_KW RCB_KW QUESTION_KW EQUALS_KW DOT_KW LE_KW LT_KW GT_KW GE_KW EQ_KW NE_KW ADD_KW SUB_KW MUL_KW WHITE_SPACE NEWLINE BOOLEAN_CONSTANT ERROR_NO_SHARP COMMENTS ERROR_ZERO
+
+%code {
+	static PrintStream writer;
+
+    public static void main(String args[]) throws IOException, FileNotFoundException {
+        YYParser yyparser;
+        final Yylex lexer;
+
+        writer = new PrintStream(new File("output.txt"));
+        lexer = new Yylex(new InputStreamReader(new FileInputStream("java_code.txt")));
+
+        yyparser = new YYParser(new Lexer() {
+
+            @Override
+            public int yylex() {
+                int yyl_return = -1;
+                try {
+
+                    yyl_return = lexer.yylex();
+                } catch (IOException e) {
+                    System.err.println("IO error :" + e);
+                }
+                return yyl_return;
+            }
+
+            @Override
+            public void yyerror(String error) {
+                System.err.println("Error : " + error);
+            }
+
+            @Override
+            public Object getLVal() {
+                return null;
+            }
+        });
+        yyparser.parse();
+
+        return;
+    }
+}
+
+
+
+%%
+
+program:
+	PROGRAM_KW IDENTIFIER declarations procedure_list compound_statement{
+		System.out.println("Rule 1: " +
+			"program: PROGRAM_KW IDENTIFIER declarations procedure_list compound_statement");
+	}
+declarations:
+	VAR_KW declaration_list SEMICOLON_KW {
+		System.out.println("Rule 2.1: " + "declarations: VAR_KW declaration_list SEMICOLON_KW");
+	}
+	|{
+		System.out.println("Rule 2.2: " + "declarations: empty");
+	}	
+	
+declaration_list: 
+	identifier_list COLON_KW type {
+		System.out.println("Rule 3.1: " + "declaration_list: identifier_list COLON_KW type");
+	}
+	|
+	declaration_list SEMICOLON_KW identifier_list COLON_KW type{
+		System.out.println("Rule 3.2: " + "declaration_list: declaration_list SEMICOLON_KW identifier_list COLON_KW type");
+	}
+
+identifier_list:
+	IDENTIFIER {
+		System.out.println("Rule 4.1: " + "identifier_list: IDENTIFIER");
+	}
+	|
+	identifier_list COMMA_KW IDENTIFIER {
+		System.out.println("Rule 4.2: " + "identifier_list: identifier_list COMMA_KW IDENTIFIER");
+	}
+	
+type:
+	INTEGER_KW {
+		System.out.println("Rule 5.1: " + "type: INTEGER_KW");
+	}
+	|
+	REAL_KW {
+		System.out.println("Rule 5.2: " + "type: REAL_KW");
+	}
+	
+procedure_list:
+	procedure_list procedure {
+		System.out.println("Rule 6.1: " + "procedure_list: procedure_list procedure");
+	}
+	|{
+		System.out.println("Rule 6.2: " + "procedure_list: empty");
+	}
+	
+procedure:
+	PROCEDURE_KW IDENTIFIER parameters SEMICOLON_KW declarations compound_statement SEMICOLON_KW {
+		System.out.println("Rule 7: " + "procedure: PROCEDURE_KW IDENTIFIER parameters SEMICOLON_KW declarations compound_statement SEMICOLON_KW");
+	}
+	
+parameters:
+	LP_KW declaration_list RP_KW {
+      System.out.println("Rule 8.1: " +
+      "parameters: LP_KW declaration_list RP_KW");
+    }
+    |{
+      System.out.println("Rule 8.2: " +
+      "arguments: empty");
+    }
+
+compound_statement : 
+		BEGIN_KW statement_list END_KW
+		{
+			System.out.println("Rule 9: " + "compound_statement :BEGIN_KW statement_list END_KW");
+		}
+
+
+statement_list:
+		statement
+		{
+			System.out.println("Rule 10.1: " + "statement_list: statement");
+		}
+		|statement_list SEMICOLON_KW statement
+		{
+			System.out.println("Rule 10.2: " + "statement_list : statement_list SEMICOLON_KW statement");
+		}
+	
+
+statement :
+		IDENTIFIER ASS_KW expression
+		{
+			System.out.println("Rule 11.1" + "statement: IDENTIFIER ASS_KW expression");
+		}
+		| IF_KW expression THEN_KW statement ELSE_KW statement 
+		{
+			System.out.println("Rule 11.2" + "statement : IF_KW expression THEN_KW statement ELSE_KW statement END_KW");
+		}
+		| IF_KW expression THEN_KW statement %prec IFX 
+		{
+			System.out.println("Rule 11.3" + "statement : IF_KW expression THEN_KW statement END_KW");
+		}
+		| REPEAT_KW statement_list EXIT_KW IF_KW expression statement_list END_KW
+		{
+			System.out.println("Rule 11.4" + "statement : REPEAT_KW statement_list EXIT_KW IF_KW expression statement_list END_KW");
+		}
+		| compound_statement
+		{
+			System.out.println("Rule 11.5" + "statement : compound_statement");
+		}
+		|IDENTIFIER arguments
+		{
+			System.out.println("Rule 11.6" + "statement : IDENTIFIER arguments");
+		}
+		|FOR_KW IDENTIFIER EQUALS_KW INTEGER_CONSTANT TO_KW INTEGER_CONSTANT DO_KW BEGIN_KW statement_list END_KW
+		{
+			System.out.println("Rule 11.7" + "statement : FOR_KW IDENTIFIER EQUALS_KW INTEGER_CONSTANT TO_KW INTEGER_CONSTANT DO_KW BEGIN_KW statement_list END_KW");
+		}
+		|FOR_KW IDENTIFIER EQUALS_KW INTEGER_CONSTANT DOWNTO_KW INTEGER_CONSTANT DO_KW BEGIN_KW statement_list END_KW
+		{
+			System.out.println("Rule 11.8" + "statement : FOR_KW IDENTIFIER EQUALS_KW INTEGER_CONSTANT DOWNTO_KW INTEGER_CONSTANT DO_KW BEGIN_KW statement_list END_KW");
+		}
+		|{
+			System.out.println("Rule 11.9: " + "statement: empty");
+		}
+		
+
+arguments :
+		LP_KW actual_parameter_list RP_KW 
+		{
+			System.out.println("Rule 12.1: " +
+			"arguments: LP_KW actual_parameter_list RP_KW");
+		}
+		|{
+			System.out.println("Rule 12.2: " +
+			"arguments: empty");
+		}
+		
+
+actual_parameter_list : 
+		actual_parameter_list COMMA_KW actual_parameter
+		{
+			System.out.println("Rule 13.1: " + "actual_parameter_list : actual_parameter_list COMMA_KW actual_parameter");
+		}
+		| actual_parameter
+		{
+			System.out.println("Rule 13.2: " + "actual_parameter_list : actual_parameter");
+		}
+		
+actual_parameter :
+		expression
+		{
+			System.out.println("Rule 14.1: " + "actual_parameter : expression");
+		}
+expression:
+		INTEGER_CONSTANT {
+			System.out.println("Rule 15.1: " + "expression: INTEGER_CONSTANT");
+		}
+		|
+		REAL_CONSTANT {
+			System.out.println("Rule 15.2: " + "expression: REAL_CONSTANT");
+		}
+		|
+		IDENTIFIER {
+			System.out.println("Rule 15.3: " + "expression: IDENTIFIER");
+		}	
+		|
+		expression ADD_KW expression {
+			System.out.println("Rule 15.4: " + "expression: expression ADD_KW expression");
+		}
+		|
+		expression SUB_KW expression {
+			System.out.println("Rule 15.5: " + "expression: expression SUB_KW expression");
+		}
+		|
+		expression MUL_KW expression {
+			System.out.println("Rule 15.6: " + "expression: expression MUL_KW expression");
+		}
+		|
+		expression DIV_KW expression {
+			System.out.println("Rule 15.7: " + "expression: expression DIV_KW expression");
+		}
+		|
+		SUB_KW expression {
+			System.out.println("Rule 15.8: " + "expression: SUB_KW expression");
+		}
+		|
+		expression MOD_KW expression {
+			System.out.println("Rule 15.9: " + "expression: expression MOD_KW expression");
+		}
+		|LP_KW expression RP_KW
+		{
+			System.out.println("Rule 15.19: " + "expression : LP_KW expression RP_KW");
+		}
+		|NOT_KW expression
+		{
+			System.out.println("Rule 15.18: " + "expression :NOT_KW expression");
+		}
+		|expression OR_KW expression
+		{
+			System.out.println("Rule 15.17: " + "expression :expression OR_KW expression");
+		}
+		|expression AND_KW expression
+		{
+			System.out.println("Rule 15.16: " + "expression :expression AND_KW expression");
+		}
+		|expression GE_KW expression
+		{
+			System.out.println("Rule 15.15: " + "expression :  expression GE_KW expression");
+		}
+		|expression GT_KW expression
+		{
+			System.out.println("Rule 15.14: " + "expression :  expression GT_KW expression");
+		}|expression NE_KW expression
+		{
+			System.out.println("Rule 15.13: " + "expression :  expression NE_KW expression");
+		}
+		|expression EQ_KW expression
+		{
+			System.out.println("Rule 15.12: " + "expression :  expression EQ_KW expression");
+		}
+		|expression LE_KW expression
+		{
+			System.out.println("Rule 15.11: " + "expression :  expression LE_KW expression");
+		}
+		|expression LT_KW expression
+		{
+			System.out.println("Rule 15.10: " + "expression :  expression LT_KW expression");
+		}
 		
