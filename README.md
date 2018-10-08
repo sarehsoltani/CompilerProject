@@ -1,5 +1,5 @@
 # CompilerProject
-Compiler course final project
+Compiler course final project Dr. razazi
 
 # Parts
     Lexical Analyzer
